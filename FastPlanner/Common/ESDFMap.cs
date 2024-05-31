@@ -17,6 +17,7 @@ class ESDFMap
     [NonSerialized] bool[,] Colord;
     [NonSerialized] int[,,] StaticObs;
     [NonSerialized] int[,,] Obs;
+    public sbyte[,] OutputMap => Map;
 
     public sbyte this[int x, int y]
     {
@@ -116,7 +117,7 @@ class ESDFMap
     public void Update(int offsetX, int offsetY, sbyte[,] dynamicMap)
     {
         Buffer.BlockCopy(StaticMap, 0, Map, 0, Map.Length * sizeof(sbyte));
-        Buffer.BlockCopy(StaticObs, 0, Obs, 0, Map.Length * sizeof(int));
+        Buffer.BlockCopy(StaticObs, 0, Obs, 0, Obs.Length * sizeof(int));
         Colord = new bool[SizeX, SizeY];
 
         Queue<(int x, int y)> openList = new Queue<(int x, int y)>();
