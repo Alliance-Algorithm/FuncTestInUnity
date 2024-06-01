@@ -10,13 +10,13 @@ class FloydMapBuilder : MonoBehaviour
     public Vector2Int FormTo;
     public string FilePath;
 
-    protected FloydMap map_;
+    protected Floyd map_;
     List<System.Numerics.Vector2> path_;
 
     public bool DebugShow = true;
     public void Build()
     {
-        FloydMap map = new();
+        Floyd map = new();
         var wayPoints = GetComponentsInChildren<WayPoints>();
         List<System.Numerics.Vector2> temp = new();
         foreach (var i in wayPoints)
@@ -40,7 +40,7 @@ class FloydMapBuilder : MonoBehaviour
 
         map.Build();
 
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(FloydMap));
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Floyd));
         File.Delete(FilePath);
         var f = File.Open(FilePath, FileMode.OpenOrCreate);
 
@@ -50,9 +50,9 @@ class FloydMapBuilder : MonoBehaviour
 
     public void Test()
     {
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(FloydMap));
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Floyd));
         var f = File.OpenRead(FilePath);
-        map_ = (FloydMap)serializer.ReadObject(f);
+        map_ = (Floyd)serializer.ReadObject(f);
         f.Close();
     }
     void OnDrawGizmosSelected()

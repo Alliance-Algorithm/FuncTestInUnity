@@ -9,15 +9,15 @@ using UnityEngine.Windows.WebCam;
 class FastPlanner
 {
     public Astar Astar;
-    public FloydMap Floyd;
+    public Floyd Floyd;
 
     public Vector2 To;
     public FastPlanner(string ESDF_Path, string FloydPath)
     {
         Astar = new Astar(ESDF_Path);
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(FloydMap));
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Floyd));
         var f = File.OpenRead(FloydPath);
-        Floyd = (FloydMap)serializer.ReadObject(f);
+        Floyd = (Floyd)serializer.ReadObject(f);
         Floyd.VornoiBuild(Astar.CostMap);
         f.Close();
     }
@@ -42,16 +42,21 @@ class FastPlanner
         var list_vec2 = priorityQueue2.Values;
         var lc1 = priorityQueue1.Values.Count;
         var lc2 = priorityQueue2.Values.Count;
+        bool upa = true, upb = true;
         List<Vector2> path = new();
+        List<Vector2> pathf = new();
+        List<Vector2> patht = new();
         while (index.a < lc1 && index.b < lc2)
         {
-            List<Vector2> pathf = new();
-            List<Vector2> patht = new();
-            while (++index.a < lc1 && !Astar.PathFinderWithDownSample(From, list_vec1[index.a].pos, 1.2f * (list_vec1[index.a].pos - From).Length(), out pathf)) ;
-            while (++index.b < lc2 && !Astar.PathFinderWithDownSample(list_vec2[index.b].pos, To, 1.2f * (list_vec2[index.b].pos - To).Length(), out patht)) ;
-
+            while (upa && ++index.a < lc1 && !Astar.PathFinderWithDownSample(From, list_vec1[index.a].pos, 1.2f * (list_vec1[index.a].pos - From).Length(), out pathf)) ;
+            while (upb && ++index.b < lc2 && !Astar.PathFinderWithDownSample(list_vec2[index.b].pos, To, 1.2f * (list_vec2[index.b].pos - To).Length(), out patht)) ;
+            upa = upb = false;
             if (index.a >= lc1 || index.b >= lc2)
+            {
+                if (priorityQueue1.Count > 0 && priorityQueue2.Count > 0)
+                    Floyd.GetPath(out path, priorityQueue1.Values[0].idx, priorityQueue2.Values[0].idx);
                 break;
+            }
 
             Floyd.GetPath(out path, list_vec1[index.a].idx, list_vec2[index.b].idx);
 
@@ -65,10 +70,8 @@ class FastPlanner
             dir12 = dir12 / dir12.Length();
             dir21 = dir21 / dir21.Length();
             dir22 = dir22 / dir22.Length();
-            if (Vector2.Dot(dir11, dir12) > 0f)
-                ++index.a;
-            else if (Vector2.Dot(dir21, dir22) > 0f)
-                ++index.b;
+            if (Vector2.Dot(dir11, dir12) > 0f) upa = true;
+            else if (Vector2.Dot(dir21, dir22) > 0f) upb = true;
             else
             {
                 break;

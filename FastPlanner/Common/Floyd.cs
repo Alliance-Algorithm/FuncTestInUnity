@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Numerics;
 
 [Serializable]
-class FloydMap
+class Floyd
 {
     public Vector2[] Points;
     int[] PathsForSave;
