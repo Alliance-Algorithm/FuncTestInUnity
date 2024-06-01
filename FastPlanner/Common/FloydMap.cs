@@ -9,8 +9,56 @@ class FloydMap
 {
     public Vector2[] Points;
     int[] PathsForSave;
+    float[] MapsForSave;
+
     [NonSerialized] public float[,] Maps;
+    [NonSerialized] public int[,] Voronoi;
+    [NonSerialized] public bool[,] Access;
     [NonSerialized] int[,] Paths;
+    [NonSerialized] bool[,] Colord;
+
+    [NonSerialized] int SizeX;
+    [NonSerialized] int SizeY;
+
+    public delegate (int x, int y) Vector22XY(Vector2 pos);
+
+    [NonSerialized] public Vector22XY vector22XY;
+
+    void VornoiBuild()
+    {
+        Colord = new bool[SizeX, SizeY];
+        Voronoi = new int[SizeX, SizeY];
+        Queue<(int i, int j)> values = new Queue<(int i, int j)>();
+        for (int i = 0, k = Points.Length; i < k; i++)
+        {
+            var j = vector22XY(Points[i]);
+            Voronoi[j.x, j.y] = i;
+            values.Enqueue(j);
+            Colord[j.x, j.y] = true;
+        }
+
+        while (values.Count > 0)
+        {
+            var q = values.Dequeue();
+            for (int i = -1; i <= 1; i++)
+                for (int j = -1; j <= 1; j++)
+                {
+                    var qi = q.i + i;
+                    var qj = q.j + i;
+                    if (qi < 0 || qi >= SizeX || qj < 0 || qj >= SizeY)
+                        continue;
+                    if (Colord[qi, qj])
+                    {
+                        Access[Voronoi[qi, qj], Voronoi[q.i, q.j]] = Access[Voronoi[q.i, q.j], Voronoi[qi, qj]] = true;
+                        continue;
+                    }
+
+                    Colord[qi, qj] = true;
+                    Voronoi[qi, qj] = Voronoi[q.i, q.j];
+                    values.Enqueue((qi, qj));
+                }
+        }
+    }
     public void Build()
     {
         Paths = new int[Maps.GetLength(0), Maps.GetLength(0)];
@@ -45,6 +93,7 @@ class FloydMap
         for (int i = 0; i < Points.Length; i++)
             for (int j = 0; j < Points.Length; j++)
                 PathsForSave[i * Points.Length + j] = Paths[i, j];
+
 
     }
 

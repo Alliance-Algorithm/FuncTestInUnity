@@ -47,16 +47,8 @@ class FloydMapBuilder : MonoBehaviour
     {
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(FloydMap));
         var f = File.OpenRead(FilePath);
-        try
-        {
-            map_ = (FloydMap)serializer.ReadObject(f);
-            map_.GetPath(out path_, FormTo[0], FormTo[1]);
-        }
-        catch (System.Exception)
-        {
-            f.Close();
-            throw;
-        }
+        map_ = (FloydMap)serializer.ReadObject(f);
+        f.Close();
     }
     void OnDrawGizmosSelected()
     {

@@ -13,6 +13,7 @@ class ESDFBuilder : MonoBehaviour
     public float Resolution = 0.05f;
     public Transform Sentry;
     ESDFMap map_;
+    public bool Show = false;
     public void Bake()
     {
         SizeX = Mathf.RoundToInt(SizeX / Resolution);
@@ -29,7 +30,7 @@ class ESDFBuilder : MonoBehaviour
         {
             for (int y = 0, l = SizeY + 1; y < l; y += 1)
             {
-                Vector3 p1 = new Vector3(-x * Resolution + 7.5f, 2.5f, y * Resolution - 14f);
+                Vector3 p1 = new Vector3(x * Resolution - 7.5f, 2.5f, -y * Resolution + 14f);
                 // Vector3 p1 = transform.position + transform.right * (x * Resolution - halfBoxsizeX) + Vector3.up * 2 + transform.forward * (-y * Resolution + halfBoxsizeY);
                 // Vector3 p1 = transform.position + new Vector3(x * Resolution - halfBoxsize, 2, y * Resolution - halfBoxsize);
 
@@ -78,6 +79,8 @@ class ESDFBuilder : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
+        if (!Show)
+            return;
         if (map_ == null)
             return;
         for (int i = 0; i < map_.SizeX; i++)

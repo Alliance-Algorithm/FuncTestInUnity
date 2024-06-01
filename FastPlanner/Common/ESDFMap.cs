@@ -84,7 +84,7 @@ class ESDFMap
                 {
                     var ci = c.x + i;
                     var cj = c.y + j;
-                    if (i == j)
+                    if (i == 0 && j == 0)
                         continue;
                     if (ci < 0 || ci >= SizeX)
                         continue;
@@ -112,6 +112,7 @@ class ESDFMap
                     openList.Enqueue((ci, cj));
                 }
         }
+        Buffer.BlockCopy(StaticMap, 0, Map, 0, Map.Length * sizeof(sbyte));
     }
 
     public void Update(int offsetX, int offsetY, sbyte[,] dynamicMap)
@@ -123,16 +124,16 @@ class ESDFMap
         Queue<(int x, int y)> openList = new Queue<(int x, int y)>();
 
 
-        for (int i = 0, k = dynamicMap.GetLength(0); i < k; i++)
-            for (int j = 0; j < k; j++)
+        for (int i = 1, k = dynamicMap.GetLength(0); i <= k; i++)
+            for (int j = 1; j <= k; j++)
             {
-                var x = i + offsetX - k / 2;
-                var y = j + offsetY - k / 2;
+                var x = -i + offsetX + k / 2;
+                var y = -j + offsetY + k / 2;
                 if (x < 0 || x >= SizeX)
                     continue;
                 if (y < 0 || y >= SizeY)
                     continue;
-                if (dynamicMap[i, j] != 0 && StaticMap[x, y] != 0)
+                if (dynamicMap[k - i, k - j] != 0 && StaticMap[x, y] != 0)
                     continue;
                 Map[x, y] = 0;
                 Obs[x, y, 0] = x;
