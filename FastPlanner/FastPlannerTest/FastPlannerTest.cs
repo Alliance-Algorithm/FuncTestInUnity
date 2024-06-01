@@ -6,8 +6,6 @@ using System.Runtime.Serialization.Json;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-
-[RequireComponent(typeof(LocalGridMapBuilder))]
 class FastPlannerTest : MonoBehaviour
 {
     public string ESDF_Path;

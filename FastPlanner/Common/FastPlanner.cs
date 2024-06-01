@@ -18,12 +18,66 @@ class FastPlanner
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(FloydMap));
         var f = File.OpenRead(FloydPath);
         Floyd = (FloydMap)serializer.ReadObject(f);
+        Floyd.VornoiBuild(Astar.CostMap);
         f.Close();
     }
 
     public void PointFinder(Vector2 From, Vector2 To, out List<Vector2> WayPoints, bool Force = false)
     {
         WayPoints = null;
+        SortedList<float, (int idx, Vector2 pos)> priorityQueue1 = new();
+        SortedList<float, (int idx, Vector2 pos)> priorityQueue2 = new();
+        var from = Astar.CostMap.Vector22XY(From);
+        var to = Astar.CostMap.Vector22XY(To);
+        for (int i = 0, f = Floyd.Voronoi[from.x, from.y], t = Floyd.Voronoi[to.x, to.y], k = Floyd.Points.Length; i < k; i++)
+        {
+            if (Floyd.Access[f, i])
+                priorityQueue1.Add((From - Floyd.Points[i]).Length(), (i, Floyd.Points[i]));
+            if (Floyd.Access[i, t])
+                priorityQueue2.Add((To - Floyd.Points[i]).Length(), (i, Floyd.Points[i]));
+        }
+
+        (int a, int b) index = new(-1, -1);
+        var list_vec1 = priorityQueue1.Values;
+        var list_vec2 = priorityQueue2.Values;
+        var lc1 = priorityQueue1.Values.Count;
+        var lc2 = priorityQueue2.Values.Count;
+        List<Vector2> path = new();
+        while (index.a < lc1 && index.b < lc2)
+        {
+            List<Vector2> pathf = new();
+            List<Vector2> patht = new();
+            while (++index.a < lc1 && !Astar.PathFinderWithDownSample(From, list_vec1[index.a].pos, 1.2f * (list_vec1[index.a].pos - From).Length(), out pathf)) ;
+            while (++index.b < lc2 && !Astar.PathFinderWithDownSample(list_vec2[index.b].pos, To, 1.2f * (list_vec2[index.b].pos - To).Length(), out patht)) ;
+
+            if (index.a >= lc1 || index.b >= lc2)
+                break;
+
+            Floyd.GetPath(out path, list_vec1[index.a].idx, list_vec2[index.b].idx);
+
+            var c1 = pathf.Count;
+            var c2 = path.Count;
+            var dir11 = pathf[c1 - 2] - pathf[c1 - 1];
+            var dir21 = patht[1] - patht[0];
+            var dir12 = path[1] - path[0];
+            var dir22 = path[c2 - 2] - path[c2 - 1];
+            dir11 = dir11 / dir11.Length();
+            dir12 = dir12 / dir12.Length();
+            dir21 = dir21 / dir21.Length();
+            dir22 = dir22 / dir22.Length();
+            if (Vector2.Dot(dir11, dir12) > 0f)
+                ++index.a;
+            else if (Vector2.Dot(dir21, dir22) > 0f)
+                ++index.b;
+            else
+            {
+                break;
+            }
+        }
+        var w = path;
+        // w.AddRange(path);
+        // w.AddRange(list_vec2[index.b]);
+        WayPoints = w;
     }
 
     // public void PointFinder(Vector2 From, Vector2 To, out List<Vector2> WayPoints, bool Force = false)

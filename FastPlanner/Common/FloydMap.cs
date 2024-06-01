@@ -9,7 +9,7 @@ class FloydMap
 {
     public Vector2[] Points;
     int[] PathsForSave;
-    float[] MapsForSave;
+    bool[] AccessForSave;
 
     [NonSerialized] public float[,] Maps;
     [NonSerialized] public int[,] Voronoi;
@@ -17,21 +17,24 @@ class FloydMap
     [NonSerialized] int[,] Paths;
     [NonSerialized] bool[,] Colord;
 
-    [NonSerialized] int SizeX;
-    [NonSerialized] int SizeY;
-
     public delegate (int x, int y) Vector22XY(Vector2 pos);
 
-    [NonSerialized] public Vector22XY vector22XY;
 
-    void VornoiBuild()
+    public void VornoiBuild(ESDFMap map)
     {
-        Colord = new bool[SizeX, SizeY];
-        Voronoi = new int[SizeX, SizeY];
+        if (Access == null)
+        {
+            Access = new bool[Points.Length, Points.Length];
+            for (int i = 0; i < Points.Length; i++)
+                for (int j = 0; j < Points.Length; j++)
+                    Access[i, j] = AccessForSave[i * Points.Length + j];
+        }
+        Colord = new bool[map.SizeX, map.SizeY];
+        Voronoi = new int[map.SizeX, map.SizeY];
         Queue<(int i, int j)> values = new Queue<(int i, int j)>();
         for (int i = 0, k = Points.Length; i < k; i++)
         {
-            var j = vector22XY(Points[i]);
+            var j = map.Vector22XY(Points[i]);
             Voronoi[j.x, j.y] = i;
             values.Enqueue(j);
             Colord[j.x, j.y] = true;
@@ -44,16 +47,16 @@ class FloydMap
                 for (int j = -1; j <= 1; j++)
                 {
                     var qi = q.i + i;
-                    var qj = q.j + i;
-                    if (qi < 0 || qi >= SizeX || qj < 0 || qj >= SizeY)
+                    var qj = q.j + j;
+                    if (qi < 0 || qi >= map.SizeX || qj < 0 || qj >= map.SizeY)
                         continue;
                     if (Colord[qi, qj])
-                    {
-                        Access[Voronoi[qi, qj], Voronoi[q.i, q.j]] = Access[Voronoi[q.i, q.j], Voronoi[qi, qj]] = true;
                         continue;
-                    }
-
                     Colord[qi, qj] = true;
+
+                    if (map[qi, qj] == 0)
+                        continue;
+
                     Voronoi[qi, qj] = Voronoi[q.i, q.j];
                     values.Enqueue((qi, qj));
                 }
@@ -90,11 +93,13 @@ class FloydMap
                 }
         }
         PathsForSave = new int[Points.Length * Points.Length];
+        AccessForSave = new bool[Points.Length * Points.Length];
         for (int i = 0; i < Points.Length; i++)
             for (int j = 0; j < Points.Length; j++)
+            {
                 PathsForSave[i * Points.Length + j] = Paths[i, j];
-
-
+                AccessForSave[i * Points.Length + j] = Access[i, j];
+            }
     }
 
     public int this[int a, int b]

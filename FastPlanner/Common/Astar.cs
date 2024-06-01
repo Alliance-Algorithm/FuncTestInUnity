@@ -84,7 +84,7 @@ class Astar
                 // priorityQueue.RemoveAt(0);
                 var v = priorityQueue.Dequeue();
                 var v2 = CostMap.XY2Vector2(v.x, v.y);
-                // UnityEngine.Debug.DrawLine(new(-v2.Y, 6.1f, v2.X), new(-v2.Y + 0.1f, 6.1f, v2.X + 0.1f), UnityEngine.Color.red, 5);
+                UnityEngine.Debug.DrawLine(new(-v2.Y, 6.1f, v2.X), new(-v2.Y + 0.1f, 6.1f, v2.X + 0.1f), UnityEngine.Color.red, 5);
                 if (Colord[v.x, v.y])
                     continue;
                 Parent[v.x, v.y] = v.p;

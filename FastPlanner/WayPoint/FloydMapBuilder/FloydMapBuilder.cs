@@ -23,14 +23,19 @@ class FloydMapBuilder : MonoBehaviour
             temp.Add(new System.Numerics.Vector2(i.transform.position.z, -i.transform.position.x));
         map.Points = temp.ToArray();
         map.Maps = new float[wayPoints.Length, wayPoints.Length];
+        map.Access = new bool[wayPoints.Length, wayPoints.Length];
         for (int i = 0; i < wayPoints.Length; i++)
             for (int j = 0; j < wayPoints.Length; j++)
                 map.Maps[i, j] = float.MaxValue;
         foreach (var i in wayPoints)
         {
             map.Maps[int.Parse(i.name), int.Parse(i.name)] = 0;
+            map.Access[int.Parse(i.name), int.Parse(i.name)] = true;
             foreach (var k in i.ToPoints)
+            {
                 map.Maps[int.Parse(i.name), int.Parse(k.name)] = (i.transform.position - k.transform.position).magnitude;
+                map.Access[int.Parse(i.name), int.Parse(k.name)] = true;
+            }
         }
 
         map.Build();
