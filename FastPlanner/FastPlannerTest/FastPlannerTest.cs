@@ -9,7 +9,7 @@ using UnityEngine.AI;
 class FastPlannerTest : MonoBehaviour
 {
     public string ESDF_Path;
-    public string Floyd_Path;
+    public string Dijkstar_Path;
     public Transform From;
     public Transform To;
     FastPlanner wayPointUpdater;
@@ -18,7 +18,7 @@ class FastPlannerTest : MonoBehaviour
 
     public void Import()
     {
-        wayPointUpdater = new(ESDF_Path, Floyd_Path);
+        wayPointUpdater = new(ESDF_Path, Dijkstar_Path);
     }
 
     public void Test()

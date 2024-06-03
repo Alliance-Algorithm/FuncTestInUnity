@@ -13,7 +13,7 @@ class Dijkstar
     [NonSerialized] public int[,] Voronoi;
     [NonSerialized] public bool[,] Access;
     [NonSerialized] public int[] Paths;
-    [NonSerialized] public float[,] Map;
+    [NonSerialized] public float[,] Maps;
 
 
     public delegate (int x, int y) Vector22XY(Vector2 pos);
@@ -63,15 +63,15 @@ class Dijkstar
     }
     public void Build()
     {
-        MapForSave = new float[Map.Length];
+        MapForSave = new float[Maps.Length];
         AccessForSave = new bool[Points.Length * Points.Length];
         for (int i = 0; i < Points.Length; i++)
             for (int j = 0; j < Points.Length; j++)
             {
                 AccessForSave[i * Points.Length + j] = Access[i, j];
-                Map[i, j] = Access[i, j] ? Map[i, j] : float.MaxValue;
+                Maps[i, j] = Access[i, j] ? Maps[i, j] : float.MaxValue;
             }
-        Buffer.BlockCopy(MapForSave, 0, Map, 0, Map.Length * sizeof(float));
+        Buffer.BlockCopy(Maps, 0, MapForSave, 0, Maps.Length * sizeof(float));
     }
     public void GetPath(Vector2 Begin, Vector2 End, out List<Vector2> Path, Vector22XY vector22XY)
     {
@@ -79,26 +79,27 @@ class Dijkstar
         int k = Points.Length;
         var Colord = new bool[k];
         Paths = new int[k];
-        if (Map == null)
-            Map = new float[k, k];
-        Buffer.BlockCopy(Map, 0, MapForSave, 0, MapForSave.Length * sizeof(float));
+        if (Maps == null)
+            Maps = new float[k, k];
+        Buffer.BlockCopy(MapForSave, 0, Maps, 0, MapForSave.Length * sizeof(float));
         var SMap = new float[k];
         var a = vector22XY(Begin);
         var b = vector22XY(End);
         int From = Voronoi[a.x, a.y];
         int To = Voronoi[b.x, b.y];
+        Colord[From] = true;
         for (int i = 0; i < k; i++)
         {
-            Map[From, i] = Map[i, From] = i != From ? (Begin - Points[i]).Length() : 0;
-            Map[To, i] = Map[i, To] = i != To ? (End - Points[i]).Length() : 0;
+            Maps[From, i] = Maps[i, From] = i != From ? (Begin - Points[i]).Length() : 0;
+            Maps[To, i] = Maps[i, To] = i != To ? (End - Points[i]).Length() : 0;
             if (Access[From, i])
             {
                 Paths[i] = From;
-                Colord[i] = true;
+                SMap[i] = Maps[From, i];
             }
-            SMap[i] = Map[From, i];
+            else SMap[i] = float.MaxValue;
         }
-        while (Colord[To])
+        while (!Colord[To])
         {
             int t = -1;
             float min = float.MaxValue;
@@ -116,26 +117,29 @@ class Dijkstar
             {
                 return;
             }
+            Colord[t] = true;
             for (int j = 0; j < k; j++)
             {
                 if (Colord[j])
                     continue;
                 if (!Access[t, j])
                     continue;
-                if (SMap[j] < min + Map[t, j])
+                if (SMap[j] > min + Maps[t, j])
                 {
-                    SMap[j] = min + Map[t, j];
-                    Colord[j] = true;
+                    SMap[j] = min + Maps[t, j];
                     Paths[j] = t;
                 }
             }
         }
         var tmp = Paths[To];
-        while (tmp != Paths[tmp])
+        Path.Add(End);
+        while (tmp != From)
         {
             Path.Add(Points[tmp]);
             tmp = Paths[tmp];
         }
+        Path.Add(Begin);
+        Path.Reverse();
         return;
     }
 }
