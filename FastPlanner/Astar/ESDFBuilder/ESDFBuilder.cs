@@ -74,7 +74,7 @@ class ESDFBuilder : MonoBehaviour
         a.Start();
         a.Build(out var m);
         var b = map_.Vector22XY(new System.Numerics.Vector2(Sentry.position.z, -Sentry.position.x));
-        map_.Update(b.x, b.y, m);
+        // map_.Update(b.x, b.y, m);
     }
 
     void OnDrawGizmosSelected()
@@ -89,7 +89,10 @@ class ESDFBuilder : MonoBehaviour
             {
                 var p = map_.XY2Vector2(i, j);
                 var p1 = new Vector3(-p.Y, 5, p.X);
-                Gizmos.color = UnityEngine.Color.red + new UnityEngine.Color(-1, 1, 0, 0) * map_[i, j] / 100.0f;
+                if (map_[i, j] > 0)
+                    Gizmos.color = UnityEngine.Color.blue + new UnityEngine.Color(0, 1, -1, 0) * map_[i, j] / 100.0f;
+                else
+                    Gizmos.color = UnityEngine.Color.blue + new UnityEngine.Color(1, 0, -1, 0) * -map_[i, j] / 100.0f;
                 Gizmos.DrawCube(p1, map_.Resolution * Vector3.one);
             }
         }

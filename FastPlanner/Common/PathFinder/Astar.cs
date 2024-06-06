@@ -36,7 +36,7 @@ class Astar
         f.Close();
         CostMap.Build();
     }
-    public void DownSample(ref List<Vector2> Path)
+    public void DownSample(float DownSampleParam, ref List<Vector2> Path)
     {
         List<Vector2> tmp = new() { Path[0] };
         for (int i = 5, l = 4, k = Path.Count - 5; i < k; i++)
@@ -45,7 +45,7 @@ class Astar
             var k1 = Math.Atan(k1_t.Y / k1_t.X);
             var k2_t = Path[i] + Path[i + 1] + Path[i + 2] - Path[i + 3] - Path[i + 4] - Path[i + 5];
             var k2 = Math.Atan(k2_t.Y / k2_t.X);
-            if (k1 - k2 < 0.1)
+            if (k1 - k2 < DownSampleParam)
             {
                 if (i != l + 1)
                 {
@@ -136,10 +136,10 @@ class Astar
         }
     }
 
-    public bool PathFinderWithDownSample(Vector2 From, Vector2 To, float MaxDistance, out List<Vector2> Path)
+    public bool PathFinderWithDownSample(Vector2 From, Vector2 To, float MaxDistance, out List<Vector2> Path, float DownSampleParam)
     {
         if (PathFinder(From, To, MaxDistance, out Path))
-            DownSample(ref Path);
+            DownSample(DownSampleParam, ref Path);
         else return false;
         return true;
     }

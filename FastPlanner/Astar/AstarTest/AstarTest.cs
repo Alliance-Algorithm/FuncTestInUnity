@@ -27,7 +27,8 @@ class AstarTest : MonoBehaviour
             new System.Numerics.Vector2(From.position.z, -From.position.x),
             new System.Numerics.Vector2(To.position.z, -To.position.x),
             50,
-            out Path
+            out Path,
+            0.2f
         );
     }
 

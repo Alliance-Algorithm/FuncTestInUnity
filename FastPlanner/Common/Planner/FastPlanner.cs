@@ -5,35 +5,63 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Serialization.Json;
-using UnityEngine.Windows.WebCam;
 
 class FastPlanner
 {
-    public Astar Astar;
+    public Astar Astar_;
     public Dijkstar Dijkstra_;
-    public BspLine.NonUniformBspLine BspLine = new();
-
+    public Optimizer.BsplineOptimizer BspLine;
+    public List<Vector2> WayPoints;
 
     public Vector2 To;
-    public FastPlanner(string ESDF_Path, string DijkstarPath)
+    public float time;
+
+    public FastPlanner(string ESDF_Path, string Dijkstar_Path)
     {
-        Astar = new Astar(ESDF_Path);
+        Astar_ = new Astar(ESDF_Path);
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Dijkstar));
-        var f = File.OpenRead(DijkstarPath);
+        var f = File.OpenRead(Dijkstar_Path);
         Dijkstra_ = (Dijkstar)serializer.ReadObject(f);
-        Dijkstra_.VornoiBuild(Astar.CostMap);
+        Dijkstra_.VornoiBuild(Astar_.CostMap);
+        BspLine = new(ESDF_Path);
         f.Close();
     }
 
-    public void PointFinder(Vector2 From, Vector2 To, out List<Vector2> WayPoints, bool Force = false)
+    public void PathFinder(Vector2 From, Vector2 To, Vector2 FromVelocity, Vector2 FromAcc, out List<Vector2> WayPoints, float DownSampleParam, bool Force = false)
     {
         WayPoints = null;
-        Dijkstra_.GetPath(From, To, out var path, Astar.CostMap.Vector22XY);
+        Dijkstra_.GetPath(From, To, out var path, Astar_.CostMap.Vector22XY);
         var w = path;
-        // w.AddRange(path);
+        Astar_.PathFinderWithDownSample(From, w[1], (From - w[1]).Length() * 1.5f, out var path1, DownSampleParam);
+        w.RemoveAt(0);
+        path1.RemoveAt(path1.Count - 1);
+        path1.AddRange(w);
+        // WayPoints = path1;
         // w.AddRange(list_vec2[index.b]);
-        WayPoints = BspLine.Build(20, w, new List<Vector2> { new(0, 0), new(0, 0), new(0, 0), new(0, 0) });
+        // if (w.Count > 1)
+        //     path1.Add(w[1]);
+        this.WayPoints = WayPoints = BspLine.Build(time, path1, new List<Vector2> { FromVelocity, new(0, 0), FromAcc, new(0, 0) }, 4, 0.1f);
     }
+
+    public bool Update(float t)
+    {
+        var k = BspLine.Update(t);
+        if (k.Safe)
+        {
+            // Dijkstra_.Obstacle[0] = new(100, 100);
+            // Dijkstra_.Obstacle[1] = new(100, 100);
+            return true;
+        }
+
+        // Dijkstra_.Obstacle[0] = WayPoints[k.Id];
+        // Dijkstra_.Obstacle[1] = WayPoints[k.Id + 1];
+        return false;
+    }
+
+    public Vector3 GetVelocity(float t) => BspLine.TargetVeclocity(t);
+    public Vector3 GetAcc(float t) => BspLine.TargetAcc(t);
+
+
 
     // public void PointFinder(Vector2 From, Vector2 To, out List<Vector2> WayPoints, bool Force = false)
     // {

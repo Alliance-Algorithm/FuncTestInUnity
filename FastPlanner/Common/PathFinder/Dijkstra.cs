@@ -16,6 +16,7 @@ class Dijkstar
     [NonSerialized] public float[,] Maps;
 
 
+    [NonSerialized] public Vector2[] Obstacle = new Vector2[2] { new(-100, 100), new(100, 100) };
     public delegate (int x, int y) Vector22XY(Vector2 pos);
 
 
