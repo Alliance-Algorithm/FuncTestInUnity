@@ -6,15 +6,14 @@ using System.Numerics;
 using System.Runtime.Serialization.Json;
 using MathNet.Numerics.LinearAlgebra.Complex;
 using MathNet.Numerics.Optimization;
-using Unity.Mathematics;
 
 namespace Optimizer
 {
     class BsplineOptimizer
     {
-        public const float limit_vel = 4 + 1e-4f;
-        public const float limit_acc = 8 + 1e-4f;
-        public const float limit_ratio = 2f + 1e-4f;
+        public const float limit_vel = 5 + 1e-4f;
+        public const float limit_acc = 5 + 1e-4f;
+        public const float limit_ratio = 4f + 1e-4f;
         public const float lambda1 = 0f;
         public const float lambda2 = 1f;
         public const float lambda3 = 0;

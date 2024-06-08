@@ -74,7 +74,7 @@ class Dijkstar
             }
         Buffer.BlockCopy(Maps, 0, MapForSave, 0, Maps.Length * sizeof(float));
     }
-    public void GetPath(Vector2 Begin, Vector2 End, out List<Vector2> Path, Vector22XY vector22XY)
+    public void Search(Vector2 Begin, Vector2 End, out List<Vector2> Path, Vector22XY vector22XY)
     {
         Path = new() { };
         int k = Points.Length;

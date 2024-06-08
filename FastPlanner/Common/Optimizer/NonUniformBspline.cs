@@ -54,7 +54,7 @@ namespace Optimizer
 
             m_ = p_ + n_;
 
-            t_ = new DenseVector(m_);
+            t_ = new DenseVector(m_ + p_);
 
             for (int i = 0; i < t_.Count; i++)
                 t_[i] = i * TimeInterval;
@@ -98,6 +98,7 @@ namespace Optimizer
             // constant
             if (K == 4)
             {
+
                 for (int i = 0; i < n_; i++)
                 {
                     // position
@@ -106,24 +107,29 @@ namespace Optimizer
                     A[i, i + 2] = prow[2];
                 }
 
-                A[n_, 0] = vrow[0] * t_inv1;
-                A[n_, 1] = vrow[1] * t_inv1;
-                A[n_, 2] = vrow[2] * t_inv1;
-                A[n_ + 1, n_ - 1] = vrow[0] * t_inv1;
-                A[n_ + 1, n_] = vrow[1] * t_inv1;
-                A[n_ + 1, n_ + 1] = vrow[2] * t_inv1;
+                A[n_ + 0, n_ - 1] = jrow[0];
+                A[n_ + 0, n_] = jrow[1];
+                A[n_ + 0, n_ + 1] = jrow[2];
+                A[n_ + 0, n_ + 2] = jrow[3];
 
-                // A[n_ + 2, 0] = arow[0] * t_inv2;
-                // A[n_ + 2, 1] = arow[1] * t_inv2;
-                // A[n_ + 2, 2] = arow[2] * t_inv2;
+                A[n_ + 1, 0] = vrow[0];
+                A[n_ + 1, 1] = vrow[1];
+                A[n_ + 1, 2] = vrow[2];
 
-                A[n_ + 2, n_ - 1] = jrow[0];
-                A[n_ + 2, n_] = jrow[1];
-                A[n_ + 2, n_ + 1] = jrow[2];
-                A[n_ + 2, n_ + 2] = jrow[3];
+                A[n_ + 2, n_ - 1] = vrow[0];
+                A[n_ + 2, n_] = vrow[1];
+                A[n_ + 2, n_ + 1] = vrow[2];
+
+                // A[n_ + 3, 0] = arow[0];
+                // A[n_ + 3, 1] = arow[1];
+                // A[n_ + 3, 2] = arow[2];
+
             }
+
+
             else if (K == 5)
             {
+
                 for (int i = 0; i < n_; i++)
                 {
                     // position
@@ -133,25 +139,27 @@ namespace Optimizer
                     A[i, i + 3] = prow[3];
                 }
 
-                A[n_, 0] = vrow[0];
-                A[n_, 1] = vrow[1];
-                A[n_, 2] = vrow[2];
-                A[n_, 3] = vrow[3];
-                A[n_ + 1, n_ - 1] = vrow[0];
-                A[n_ + 1, n_] = vrow[1];
-                A[n_ + 1, n_ + 1] = vrow[2];
-                A[n_ + 1, n_ + 2] = vrow[3];
+                A[n_ + 0, n_ - 1] = srow[0];
+                A[n_ + 0, n_] = srow[1];
+                A[n_ + 0, n_ + 1] = srow[2];
+                A[n_ + 0, n_ + 2] = srow[3];
+                A[n_ + 0, n_ + 3] = srow[4];
 
-                A[n_ + 2, n_ - 1] = arow[0];
-                A[n_ + 2, n_] = arow[1];
-                A[n_ + 2, n_ + 1] = arow[2];
-                A[n_ + 2, n_ + 2] = arow[3];
+                A[n_ + 1, 0] = vrow[0];
+                A[n_ + 1, 1] = vrow[1];
+                A[n_ + 1, 2] = vrow[2];
+                A[n_ + 1, 3] = vrow[3];
 
-                A[n_ + 3, n_ - 1] = srow[0];
-                A[n_ + 3, n_] = srow[1];
-                A[n_ + 3, n_ + 1] = srow[2];
-                A[n_ + 3, n_ + 2] = srow[3];
-                A[n_ + 3, n_ + 3] = srow[4];
+                A[n_ + 2, n_ - 1] = vrow[0];
+                A[n_ + 2, n_ + 0] = vrow[1];
+                A[n_ + 2, n_ + 1] = vrow[2];
+                A[n_ + 2, n_ + 2] = vrow[3];
+
+                A[n_ + 3, 0] = arow[0];
+                A[n_ + 3, 1] = arow[1];
+                A[n_ + 3, 2] = arow[2];
+                A[n_ + 3, 3] = arow[3];
+
             }
 
             var b = new DenseMatrix(m_, 3);
@@ -171,18 +179,15 @@ namespace Optimizer
                 StartEndDerivative[1] = StartEndDerivative[1] / k2 * (k2 < limit_vel ? k2 : limit_vel);
             if (k3 != 0)
                 StartEndDerivative[2] = StartEndDerivative[2] / k3 * (k3 > limit_acc ? k3 : limit_acc);
-            b[n_, 0] = StartEndDerivative[0].X;
-            b[n_, 1] = StartEndDerivative[0].Y;
-            b[n_ + 1, 0] = StartEndDerivative[1].X;
-            b[n_ + 1, 1] = StartEndDerivative[1].Y;
+            b[n_ + 1, 0] = StartEndDerivative[0].X;
+            b[n_ + 1, 1] = StartEndDerivative[0].Y;
+            if (p_ == 5)
+            {
+                b[n_ + 3, 0] = StartEndDerivative[2].X;
+                b[n_ + 3, 1] = StartEndDerivative[2].X;
+            }
             // b[n_ + 2, 0] = StartEndDerivative[2].X;
             // b[n_ + 2, 1] = StartEndDerivative[2].Y;
-            // position
-            // var t = new DenseMatrix(m_ + 1, m_ + 3);
-            // for (int i = 0; i < m_ + 1; i++)
-            //     t.SetColumn(i, A.Column(i));
-            // for (int i = 0; i < 3; i++)
-            //     t.SetColumn(i + m_, b.Column(i));
             controlPoints_ = (DenseMatrix)A.Solve(b);
         }
         internal void SetUniformBSpline(int Order, float Interval)
@@ -221,8 +226,8 @@ namespace Optimizer
             var ret = new List<Vector2>();
             for (float tu = t_[p_]; tu <= t_[m_ - 1]; tu += 0.1f)
             {
-                // if (t_[m_ - 1] > 100)
-                //     break;
+                if (t_[m_ - 1] > 1000)
+                    break;
                 ret.Add(EvaluateTimePos(tu));
             }
 
@@ -241,7 +246,7 @@ namespace Optimizer
             for (float tu = t_[k1]; tu <= t_[k1 + 1]; tu += 0.1f)
             {
                 var p = CostMap.Vector22XY(EvaluateTimePos(tu));
-                if (CostMap[p.x, p.y] != 0)
+                if (CostMap[p.x, p.y] > 0)
                     continue;
                 else
                 {
@@ -278,7 +283,7 @@ namespace Optimizer
         internal bool ReallocateTime()
         {
             bool fea = true;
-            for (int i = 0; i < n_ - 1; i++)
+            for (int i = 0; i < m_ - 1; i++)
             {
                 var t1 = new Vector2(controlPoints_[i, 0], controlPoints_[i, 1]);
                 var t2 = new Vector2(controlPoints_[i + 1, 0], controlPoints_[i + 1, 1]);
@@ -296,17 +301,17 @@ namespace Optimizer
                     var t_inc = delta / p_;
                     for (int j = i + 2; j <= i + p_ + 1; j++)
                         t_[j] += (j - i - 1) * t_inc;
-                    for (int j = i + p_ + 2; j < m_; j++)
+                    for (int j = i + p_ + 2; j < t_.Count; j++)
                         t_[j] += delta;
                 }
             }
-            for (int i = 0; i < n_ - 2; i++)
+            for (int i = 0; i < m_ - 2; i++)
             {
                 var t11 = new Vector2(controlPoints_[i, 0], controlPoints_[i, 1]);
                 var t21 = new Vector2(controlPoints_[i + 1, 0], controlPoints_[i + 1, 1]);
                 var t12 = new Vector2(controlPoints_[i + 1, 0], controlPoints_[i + 1, 1]);
                 var t22 = new Vector2(controlPoints_[i + 2, 0], controlPoints_[i + 2, 1]);
-                var l = p_ * (p_ + 1) * ((t22 - t12) / (t_[i + p_ + 2] - t_[i + 2]) - (t21 - t11) / (t_[i + p_ + 1] - t_[i + 1])).Length() / (t_[i + p_ + 2] - t_[i + 1]);
+                var l = p_ * (p_ - 1) * ((t22 - t12) / (t_[i + p_ + 2] - t_[i + 2]) - (t21 - t11) / (t_[i + p_ + 1] - t_[i + 1])).Length() / (t_[i + p_ + 1] - t_[i + 2]);
                 var t_origin = t_[i + p_ + 2] - t_[i + 1];
                 if (l > limit_acc)
                 {
@@ -326,9 +331,9 @@ namespace Optimizer
                     }
                     else
                     {
-                        for (int j = i + 1; j <= i + p_ + 2; j++)
+                        for (int j = i + 2; j <= i + p_ + 1; j++)
                             t_[j] += (j - i - 1) * t_inc;
-                        for (int j = i + p_ + 3; j < m_; j++)
+                        for (int j = i + p_ + 2; j < t_.Count; j++)
                             t_[j] += delta;
                     }
                 }

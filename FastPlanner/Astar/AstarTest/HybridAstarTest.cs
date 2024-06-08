@@ -7,28 +7,28 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(LocalGridMapBuilder))]
-class AstarTest : MonoBehaviour
+class HybridAstarTest : MonoBehaviour
 {
     public string ESDF_Path;
     public Transform From;
     public Transform To;
-    Astar astar;
+    HybridAstar astar;
     List<System.Numerics.Vector2> Path;
     public bool Show = true;
 
     public void Import()
     {
-        astar = new Astar(ESDF_Path) { };
+        astar = new HybridAstar(ESDF_Path) { };
     }
 
     public void Test()
     {
         astar.SearchWithDownSample(
-            new System.Numerics.Vector2(From.position.z, -From.position.x),
-            new System.Numerics.Vector2(To.position.z, -To.position.x),
+            (new System.Numerics.Vector2(From.position.z, -From.position.x), float.MaxValue),
+            (new System.Numerics.Vector2(To.position.z, -To.position.x), float.MaxValue),
             50,
             out Path,
-            0.2f
+            15
         );
     }
 

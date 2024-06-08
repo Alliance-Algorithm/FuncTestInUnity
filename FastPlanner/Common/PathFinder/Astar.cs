@@ -62,7 +62,7 @@ class Astar
         Path = tmp;
     }
 
-    public bool PathFinder(Vector2 From, Vector2 To, float MaxDistance, out List<Vector2> Path)
+    public bool Search(Vector2 From, Vector2 To, float MaxDistance, out List<Vector2> Path)
     {
         Path = new();
         bool[,] Colord = new bool[CostMap.SizeX, CostMap.SizeY];
@@ -136,9 +136,9 @@ class Astar
         }
     }
 
-    public bool PathFinderWithDownSample(Vector2 From, Vector2 To, float MaxDistance, out List<Vector2> Path, float DownSampleParam)
+    public bool SearchWithDownSample(Vector2 From, Vector2 To, float MaxDistance, out List<Vector2> Path, float DownSampleParam)
     {
-        if (PathFinder(From, To, MaxDistance, out Path))
+        if (Search(From, To, MaxDistance, out Path))
             DownSample(DownSampleParam, ref Path);
         else return false;
         return true;

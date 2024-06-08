@@ -21,7 +21,8 @@ public class ESDFMap
 
     public sbyte this[int x, int y]
     {
-        get => Map == null ? (sbyte)-1 : Map[x, y];
+        get => Map == null ? sbyte.MinValue :
+         (x < 0 || y < 0 || x >= SizeX || y >= SizeY ? sbyte.MinValue : Map[x, y]);
         set
         {
             if (Map == null)

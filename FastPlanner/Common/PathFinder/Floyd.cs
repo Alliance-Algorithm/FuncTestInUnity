@@ -108,7 +108,7 @@ class Floyd
         set => Paths[a, b] = value;
     }
 
-    public void GetPath(out List<Vector2> Path, int Form, int To)
+    public void Search(out List<Vector2> Path, int Form, int To)
     {
         if (Paths == null)
         {

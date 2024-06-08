@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Json;
 
 class FastPlanner
 {
-    public Astar Astar_;
+    public HybridAstar Astar_;
     public Dijkstar Dijkstra_;
     public Optimizer.BsplineOptimizer BspLine;
     public List<Vector2> WayPoints;
@@ -18,7 +18,7 @@ class FastPlanner
 
     public FastPlanner(string ESDF_Path, string Dijkstar_Path)
     {
-        Astar_ = new Astar(ESDF_Path);
+        Astar_ = new HybridAstar(ESDF_Path);
         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Dijkstar));
         var f = File.OpenRead(Dijkstar_Path);
         Dijkstra_ = (Dijkstar)serializer.ReadObject(f);
@@ -30,9 +30,9 @@ class FastPlanner
     public void PathFinder(Vector2 From, Vector2 To, Vector2 FromVelocity, Vector2 FromAcc, out List<Vector2> WayPoints, float DownSampleParam, bool Force = false)
     {
         WayPoints = null;
-        Dijkstra_.GetPath(From, To, out var path, Astar_.CostMap.Vector22XY);
+        Dijkstra_.Search(From, To, out var path, Astar_.CostMap.Vector22XY);
         var w = path;
-        Astar_.PathFinderWithDownSample(From, w[1], (From - w[1]).Length() * 1.5f, out var path1, DownSampleParam);
+        Astar_.SearchWithDownSample((From, float.MaxValue), (w[1], float.MaxValue), (From - w[1]).Length() * 1.5f, out var path1, DownSampleParam);
         w.RemoveAt(0);
         path1.RemoveAt(path1.Count - 1);
         path1.AddRange(w);
