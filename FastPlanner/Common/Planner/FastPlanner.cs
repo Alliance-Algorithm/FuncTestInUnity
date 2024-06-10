@@ -43,9 +43,9 @@ class FastPlanner
         this.WayPoints = WayPoints = BspLine.Build(path1, new List<Vector2> { FromVelocity, new(0, 0), FromAcc, new(0, 0) }, 4, 0.1f);
     }
 
-    public bool Update(float t)
+    public bool Update(float t, Vector2 Position)
     {
-        var k = BspLine.Update(t);
+        var k = BspLine.Update(t, Position);
         if (k.Safe)
         {
             // Dijkstra_.Obstacle[0] = new(100, 100);

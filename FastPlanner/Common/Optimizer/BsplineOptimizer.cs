@@ -11,8 +11,8 @@ namespace Optimizer
 {
     class BsplineOptimizer
     {
-        public const float limit_vel = 1 + 1e-4f;
-        public const float limit_acc = 5 + 1e-4f;
+        public const float limit_vel = 5 + 1e-4f;
+        public const float limit_acc = 2f + 1e-4f;
         public const float limit_ratio = 4f + 1e-4f;
         public const float lambda1 = 0f;
         public const float lambda2 = 1f;
@@ -38,9 +38,9 @@ namespace Optimizer
             return nonUniformBspline.GetPath();
         }
 
-        public (int Id, bool Safe) Update(float t)
+        public (int Id, bool Safe) Update(float t, Vector2 Position)
         {
-            return nonUniformBspline.Check(t, CostMap);
+            return nonUniformBspline.Check(t, CostMap, Position);
         }
 
         public Vector3 TargetVeclocity(float t) => nonUniformBspline.GetVelocity(t);

@@ -31,7 +31,7 @@ class FastPlannerTest : MonoBehaviour
         t = fastPlanner.GetAcc(localTime_);
         From.TargetAcc = new UnityEngine.Vector3(-t.Y, 0, t.X);
         localTime_ += Time.deltaTime;
-        if (!fastPlanner.Update(localTime_))
+        if (!fastPlanner.Update(localTime_, new System.Numerics.Vector2(From.transform.position.z, -From.transform.position.x)))
         {
             fastPlanner.PathFinder(
                 new System.Numerics.Vector2(From.transform.position.z, -From.transform.position.x),
