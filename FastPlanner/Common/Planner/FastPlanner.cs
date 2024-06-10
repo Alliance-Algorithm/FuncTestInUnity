@@ -40,7 +40,7 @@ class FastPlanner
         // w.AddRange(list_vec2[index.b]);
         // if (w.Count > 1)
         //     path1.Add(w[1]);
-        this.WayPoints = WayPoints = BspLine.Build(time, path1, new List<Vector2> { FromVelocity, new(0, 0), FromAcc, new(0, 0) }, 4, 0.1f);
+        this.WayPoints = WayPoints = BspLine.Build(path1, new List<Vector2> { FromVelocity, new(0, 0), FromAcc, new(0, 0) }, 4, 0.1f);
     }
 
     public bool Update(float t)
